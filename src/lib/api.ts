@@ -1,4 +1,6 @@
-import { ApiResponse, CatalogOrder, CatalogProduct } from '@/lib/types';
+import { ApiResponse, CatalogOrder, CatalogProduct, PaginationMeta } from '@/lib/types';
+
+export const PRODUCTS_PAGE_SIZE = 20;
 
 const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
@@ -10,7 +12,7 @@ function getApiUrl() {
   return apiUrl;
 }
 
-async function request<T>(path: string, init?: RequestInit): Promise<T> {
+async function request<T>(path: string, init?: RequestInit): Promise<ApiResponse<T>> {
   const response = await fetch(`${getApiUrl()}${path}`, {
     ...init,
     headers: {
@@ -26,19 +28,41 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
     throw new Error(payload.error?.message || payload.message || 'No se pudo completar la solicitud');
   }
 
-  return payload.data;
+  return payload;
 }
 
 export async function getProducts(pointOfSaleId: string) {
-  return request<CatalogProduct[]>(`/api/v1/catalog/public/products?pointOfSaleId=${encodeURIComponent(pointOfSaleId)}`);
+  const payload = await request<CatalogProduct[]>(`/api/v1/catalog/public/products?pointOfSaleId=${encodeURIComponent(pointOfSaleId)}`);
+  return payload.data;
+}
+
+export async function getProductsPage(pointOfSaleId: string, page = 1, limit = PRODUCTS_PAGE_SIZE): Promise<{
+  products: CatalogProduct[];
+  meta: PaginationMeta;
+}> {
+  const payload = await request<CatalogProduct[]>(
+    `/api/v1/catalog/public/products?pointOfSaleId=${encodeURIComponent(pointOfSaleId)}&page=${page}&limit=${limit}`
+  );
+
+  return {
+    products: payload.data,
+    meta: payload.meta ?? {
+      page,
+      limit,
+      total: payload.data.length,
+      totalPages: payload.data.length === 0 ? 0 : 1,
+    },
+  };
 }
 
 export async function getProduct(id: string, pointOfSaleId: string) {
-  return request<CatalogProduct>(`/api/v1/catalog/public/products/${id}?pointOfSaleId=${encodeURIComponent(pointOfSaleId)}`);
+  const payload = await request<CatalogProduct>(`/api/v1/catalog/public/products/${id}?pointOfSaleId=${encodeURIComponent(pointOfSaleId)}`);
+  return payload.data;
 }
 
 export async function getOrder(id: string) {
-  return request<CatalogOrder>(`/api/v1/catalog/public/orders/${id}`);
+  const payload = await request<CatalogOrder>(`/api/v1/catalog/public/orders/${id}`);
+  return payload.data;
 }
 
 export async function createOrder(input: {
@@ -53,11 +77,13 @@ export async function createOrder(input: {
     quantity: number;
   }>;
 }) {
-  return request<CatalogOrder>('/api/v1/catalog/public/orders', {
+  const payload = await request<CatalogOrder>('/api/v1/catalog/public/orders', {
     method: 'POST',
     body: JSON.stringify({
       ...input,
       paymentMethod: 'MERCADO_PAGO',
     }),
   });
+
+  return payload.data;
 }

@@ -57,17 +57,19 @@ export interface CatalogOrder {
 export interface ApiResponse<T> {
   success: boolean;
   data: T;
-  meta?: {
-    page: number;
-    limit: number;
-    total: number;
-    totalPages: number;
-  };
+  meta?: PaginationMeta;
   error?: {
     code: string;
     message: string;
     details?: unknown;
   };
+}
+
+export interface PaginationMeta {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
 }
 
 export interface CartItem {

@@ -1,6 +1,6 @@
 import { MapPin } from 'lucide-react';
-import { ProductCard } from '@/components/product-card';
-import { getProducts } from '@/lib/api';
+import { ProductFeed } from '@/components/product-feed';
+import { getProductsPage } from '@/lib/api';
 import { buildCatalogMetadata, resolvePointOfSaleLabel } from '@/lib/catalog-metadata';
 
 export const dynamic = 'force-dynamic';
@@ -30,8 +30,8 @@ export default async function HomePage({
     );
   }
 
-  const [products, pointOfSaleLabel] = await Promise.all([
-    getProducts(pos),
+  const [{ products, meta }, pointOfSaleLabel] = await Promise.all([
+    getProductsPage(pos),
     resolvePointOfSaleLabel(pos),
   ]);
 
@@ -50,11 +50,7 @@ export default async function HomePage({
           No hay productos con stock para este punto de venta.
         </div>
       ) : (
-        <div className="grid grid-cols-2 gap-3">
-          {products.map((product) => (
-            <ProductCard key={product.id} product={product} pos={pos} />
-          ))}
-        </div>
+        <ProductFeed initialProducts={products} initialMeta={meta} pos={pos} />
       )}
     </section>
   );
