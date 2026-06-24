@@ -78,6 +78,24 @@ export function CheckoutClient() {
         </div>
       </div>
 
+      <div className="rounded-[2rem] border border-emerald-300 bg-emerald-600 p-4 text-white shadow-card">
+        <p className="text-sm font-semibold uppercase tracking-[0.2em] text-emerald-100">Datos de transferencia</p>
+        <div className="mt-3 space-y-2 text-sm">
+          <p>
+            <span className="font-semibold text-emerald-100">Alias:</span>{' '}
+            <span className="font-bold">iront.cf</span>
+          </p>
+          <p>
+            <span className="font-semibold text-emerald-100">Titular:</span>{' '}
+            <span className="font-medium">Augusto Lucas Villafañe Palma</span>
+          </p>
+          <p>
+            <span className="font-semibold text-emerald-100">Cuenta:</span>{' '}
+            <span className="font-medium">Mercado Pago</span>
+          </p>
+        </div>
+      </div>
+
       {error ? <p className="rounded-2xl bg-red-50 px-4 py-3 text-sm text-red-700">{error}</p> : null}
 
       <button disabled={loading} className="w-full rounded-2xl bg-accent px-4 py-3 font-semibold text-white disabled:opacity-70">
