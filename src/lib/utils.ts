@@ -1,4 +1,4 @@
-import { CartItem } from '@/lib/types';
+import { CartItem, CatalogOrderItem } from '@/lib/types';
 
 export function formatPrice(value: number) {
   return new Intl.NumberFormat('es-AR', {
@@ -25,8 +25,9 @@ export function getCartTotal(items: CartItem[]) {
   return items.reduce((sum, item) => sum + item.price * item.quantity, 0);
 }
 
-export function getWhatsappUrl(phone: string, orderId: string) {
-  const text = encodeURIComponent(`Hola, envio el comprobante del pedido ${orderId}.`);
+export function getWhatsappUrl(phone: string, pos: string, items: CatalogOrderItem[]) {
+  const productNames = items.map((item) => item.productNameSnapshot).join(', ');
+  const text = encodeURIComponent(`Hola, estoy en el punto de venta ${pos} para enviarte el comprobante de ${productNames}.`);
   return `https://wa.me/${phone}?text=${text}`;
 }
 

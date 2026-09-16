@@ -35,7 +35,7 @@ export default async function ConfirmationPage({
         <p className="mt-3 text-sm text-stone-600">
           Envia el comprobante a WhatsApp{' '}
           <a
-            href={getWhatsappUrl(whatsapp, order.id)}
+            href={getWhatsappUrl(whatsapp, pos ?? '', order.items)}
             target="_blank"
             rel="noreferrer"
             className="font-semibold text-accent"
@@ -47,11 +47,10 @@ export default async function ConfirmationPage({
         <div className="mt-4 rounded-2xl bg-accentSoft px-4 py-3">
           <p className="text-sm">Total</p>
           <p className="text-xl font-bold text-accent">{formatPrice(order.total)}</p>
-          <p className="mt-1 text-xs text-stone-600">Pedido #{order.id}</p>
         </div>
 
         <a
-          href={getWhatsappUrl(whatsapp, order.id)}
+          href={getWhatsappUrl(whatsapp, pos ?? '', order.items)}
           target="_blank"
           rel="noreferrer"
           className="mt-5 flex w-full items-center justify-center gap-2 rounded-2xl bg-accent px-4 py-3 font-semibold text-white"
