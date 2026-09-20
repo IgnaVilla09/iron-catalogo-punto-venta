@@ -13,6 +13,7 @@ export function ProductDetail({ product }: { product: CatalogProduct }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const pos = searchParams.get('pos');
+  const search = searchParams.get('search');
   const addItem = useCartStore((state) => state.addItem);
   const whatsapp = CATALOG_WHATSAPP;
 
@@ -161,7 +162,7 @@ export function ProductDetail({ product }: { product: CatalogProduct }) {
             type="button"
             onClick={() => {
               commitAdd();
-              router.push(buildPosPath('/checkout', pos));
+              router.push(buildPosPath('/checkout', pos, search));
             }}
             className="rounded-2xl bg-accent px-4 py-3 font-semibold text-white"
           >

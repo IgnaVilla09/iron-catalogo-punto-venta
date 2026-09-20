@@ -9,6 +9,7 @@ import { buildPosPath, formatPrice, getCartTotal } from '@/lib/utils';
 export function CartClient() {
   const searchParams = useSearchParams();
   const pos = searchParams.get('pos');
+  const search = searchParams.get('search');
   const items = useCartStore((state) => state.items);
   const updateQuantity = useCartStore((state) => state.updateQuantity);
   const removeItem = useCartStore((state) => state.removeItem);
@@ -17,7 +18,7 @@ export function CartClient() {
     return (
       <div className="rounded-[2rem] border border-dashed border-border bg-card p-6 text-center shadow-card">
         <p className="mb-3 text-lg font-semibold">Tu carrito esta vacio</p>
-        <Link href={buildPosPath('/', pos)} className="inline-flex rounded-full bg-accent px-5 py-3 font-semibold text-white">
+        <Link href={buildPosPath('/', pos, search)} className="inline-flex rounded-full bg-accent px-5 py-3 font-semibold text-white">
           Ver productos
         </Link>
       </div>
@@ -59,7 +60,7 @@ export function CartClient() {
           <span>Total</span>
           <span>{formatPrice(getCartTotal(items))}</span>
         </div>
-        <Link href={buildPosPath('/checkout', pos)} className="flex w-full items-center justify-center rounded-2xl bg-accent px-4 py-3 font-semibold text-white">
+        <Link href={buildPosPath('/checkout', pos, search)} className="flex w-full items-center justify-center rounded-2xl bg-accent px-4 py-3 font-semibold text-white">
           Continuar compra
         </Link>
       </div>

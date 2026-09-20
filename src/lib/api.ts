@@ -36,12 +36,22 @@ export async function getProducts(pointOfSaleId: string) {
   return payload.data;
 }
 
-export async function getProductsPage(pointOfSaleId: string, page = 1, limit = PRODUCTS_PAGE_SIZE): Promise<{
+export async function getProductsPage(pointOfSaleId: string, page = 1, limit = PRODUCTS_PAGE_SIZE, search?: string): Promise<{
   products: CatalogProduct[];
   meta: PaginationMeta;
 }> {
+  const params = new URLSearchParams({
+    pointOfSaleId,
+    page: String(page),
+    limit: String(limit),
+  });
+
+  if (search) {
+    params.set('search', search);
+  }
+
   const payload = await request<CatalogProduct[]>(
-    `/api/v1/catalog/public/products?pointOfSaleId=${encodeURIComponent(pointOfSaleId)}&page=${page}&limit=${limit}`
+    `/api/v1/catalog/public/products?${params.toString()}`
   );
 
   return {

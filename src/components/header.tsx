@@ -10,6 +10,7 @@ import { buildPosPath } from '@/lib/utils';
 export function Header() {
   const searchParams = useSearchParams();
   const pos = searchParams.get('pos');
+  const search = searchParams.get('search');
   const items = useCartStore((state) => state.items);
   const lastAddedAt = useCartStore((state) => state.lastAddedAt);
   const count = items.reduce((sum, item) => sum + item.quantity, 0);
@@ -30,11 +31,11 @@ export function Header() {
     <header className="sticky top-0 z-10 border-b border-border bg-background/95 backdrop-blur">
       <div className="mx-auto flex max-w-md items-center justify-between gap-3 px-4 py-3">
         <div className="w-10" />
-        <Link href={buildPosPath('/', pos)} className="flex justify-center">
+        <Link href={buildPosPath('/', pos, search)} className="flex justify-center">
           <Image src="/logo.png" alt="Iron Catalog" width={120} height={44} priority className="h-11 w-auto" />
         </Link>
         <div className="relative flex flex-col items-end">
-          <Link href={buildPosPath('/cart', pos)} className="relative flex h-10 w-10 items-center justify-center rounded-full border border-border bg-card shadow-card">
+          <Link href={buildPosPath('/cart', pos, search)} className="relative flex h-10 w-10 items-center justify-center rounded-full border border-border bg-card shadow-card">
             <svg viewBox="0 0 24 24" aria-hidden="true" className="h-[18px] w-[18px] fill-none stroke-current stroke-2">
               <circle cx="9" cy="20" r="1" />
               <circle cx="18" cy="20" r="1" />

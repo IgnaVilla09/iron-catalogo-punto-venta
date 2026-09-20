@@ -12,13 +12,24 @@ export function cn(...values: Array<string | false | null | undefined>) {
   return values.filter(Boolean).join(' ');
 }
 
-export function buildPosPath(path: string, pos?: string | null) {
-  if (!pos) {
+export function buildPosPath(path: string, pos?: string | null, search?: string | null) {
+  const params = new URLSearchParams();
+
+  if (pos) {
+    params.set('pos', pos);
+  }
+
+  if (search) {
+    params.set('search', search);
+  }
+
+  const queryString = params.toString();
+  if (!queryString) {
     return path;
   }
 
   const separator = path.includes('?') ? '&' : '?';
-  return `${path}${separator}pos=${encodeURIComponent(pos)}`;
+  return `${path}${separator}${queryString}`;
 }
 
 export function getCartTotal(items: CartItem[]) {
