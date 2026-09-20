@@ -15,7 +15,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <Suspense fallback={<div className="h-[69px] border-b border-border bg-background" />}>
           <Header />
         </Suspense>
-        <main className="mx-auto flex h-[calc(100vh-69px)] max-w-md flex-col overflow-hidden px-4 pt-5">
+        <main className="mx-auto flex h-[calc(100vh-69px)] max-w-md flex-col overflow-y-auto px-4 pt-5">
           {children}
         </main>
       </body>
