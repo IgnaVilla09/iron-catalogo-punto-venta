@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="es">
-      <body className="h-screen overflow-hidden">
+      <body className="h-screen">
         <Suspense fallback={<div className="h-[69px] border-b border-border bg-background" />}>
           <Header />
         </Suspense>
