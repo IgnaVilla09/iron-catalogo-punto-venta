@@ -15,12 +15,12 @@ export async function generateMetadata({
 
 export default function CheckoutPage() {
   return (
-    <section className="space-y-4">
-      <div>
-        <p className="text-xs uppercase tracking-[0.3em] text-stone-500">Checkout</p>
-        <h1 className="text-2xl font-bold">Completa tus datos</h1>
+    <section className="mx-auto w-full max-w-5xl space-y-6">
+      <div className="border-b border-border pb-5">
+        <p className="section-label">Último paso</p>
+        <h1 className="mt-2 text-5xl font-bold sm:text-6xl">Completá tus datos</h1>
       </div>
-      <Suspense fallback={<div className="rounded-[2rem] border border-border bg-card p-4 shadow-card">Cargando checkout...</div>}>
+      <Suspense fallback={<div className="border border-border bg-card p-4">Cargando compra...</div>}>
         <CheckoutClient />
       </Suspense>
     </section>

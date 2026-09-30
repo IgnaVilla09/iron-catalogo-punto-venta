@@ -24,9 +24,9 @@ export default async function HomePage({
 
   if (!pos) {
     return (
-      <div className="rounded-[2rem] border border-dashed border-border bg-card p-6 text-center shadow-card">
-        <p className="text-lg font-semibold">Falta el punto de venta</p>
-        <p className="mt-2 text-sm text-stone-600">Abrir el catalogo con `?pos=...` para cargar los productos.</p>
+      <div className="mx-auto w-full max-w-xl border border-border bg-card p-8 text-center">
+        <h1 className="text-4xl font-bold">Falta el punto de venta</h1>
+        <p className="mt-3 text-sm text-muted">Abrí el catálogo desde el enlace de tu punto de venta para ver los productos.</p>
       </div>
     );
   }
@@ -37,24 +37,25 @@ export default async function HomePage({
   ]);
 
   return (
-    <section className="flex flex-col overflow-hidden">
-      <div className="shrink-0 pb-4">
-        <p className="flex items-center gap-2 text-xs uppercase tracking-[0.3em] text-stone-500">
-          <MapPin className="h-4 w-4" />
-          Catalogo {pointOfSaleLabel ?? pos.toUpperCase()}
+    <section className="flex min-h-0 flex-1 flex-col">
+      <div className="shrink-0 border-b border-border pb-5">
+        <p className="flex items-center gap-2 text-sm font-semibold text-muted">
+          <MapPin className="h-4 w-4 text-accent" aria-hidden="true" />
+          {pointOfSaleLabel ?? pos.toUpperCase()}
         </p>
-        <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold">Productos disponibles</h1>
-          <SearchBarWrapper pos={pos} initialValue={search} />
+        <div className="mt-3 flex items-end justify-between gap-3">
+          <h1 className="text-[2.75rem] font-bold leading-none sm:text-6xl">Productos disponibles</h1>
+          <SearchBarWrapper initialValue={search} />
         </div>
       </div>
 
       {products.length === 0 ? (
-        <div className="rounded-[2rem] border border-dashed border-border bg-card p-6 text-center shadow-card">
-          {search ? `No se encontraron resultados para "${search}".` : 'No hay productos con stock para este punto de venta.'}
+        <div className="mt-6 border border-border bg-white px-6 py-12 text-center">
+          <h2 className="text-3xl font-semibold">{search ? 'No encontramos coincidencias' : 'Todavía no hay productos'}</h2>
+          <p className="mt-3 text-sm text-muted">{search ? `Probá con otro nombre para «${search}».` : 'Volvé más tarde para descubrir las novedades de este punto de venta.'}</p>
         </div>
       ) : (
-        <ProductFeed initialProducts={products} initialMeta={meta} pos={pos} search={search} />
+        <ProductFeed key={`${pos}:${search ?? ''}`} initialProducts={products} initialMeta={meta} pos={pos} search={search} />
       )}
     </section>
   );

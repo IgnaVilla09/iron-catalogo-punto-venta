@@ -5,15 +5,13 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        background: '#f5f1eb',
-        foreground: '#1f1720',
-        card: '#fffdf9',
-        border: '#e5ddd1',
-        accent: '#00b1cd',
-        accentSoft: '#dff7fb',
-      },
-      boxShadow: {
-        card: '0 10px 30px rgba(31, 23, 32, 0.08)',
+        background: '#f2f4f3',
+        foreground: '#202329',
+        card: '#ffffff',
+        border: '#d5dbda',
+        accent: '#00afc8',
+        accentSoft: '#d9f5f8',
+        muted: '#68717a',
       },
     },
   },

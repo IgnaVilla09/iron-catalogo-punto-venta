@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { Search, X } from 'lucide-react';
+import { Eraser, Search, X } from 'lucide-react';
 
 interface SearchBarProps {
   initialValue?: string;
@@ -9,86 +9,41 @@ interface SearchBarProps {
 }
 
 export function SearchBar({ initialValue = '', onSearch }: SearchBarProps) {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(Boolean(initialValue));
   const [value, setValue] = useState(initialValue);
   const inputRef = useRef<HTMLInputElement>(null);
-  const formRef = useRef<HTMLFormElement>(null);
-
-  useEffect(() => {
-    if (open) {
-      setTimeout(() => inputRef.current?.focus(), 150);
-    }
-  }, [open]);
 
   useEffect(() => {
     setValue(initialValue);
+    if (initialValue) setOpen(true);
   }, [initialValue]);
 
-  function handleSubmit(event: React.FormEvent) {
-    event.preventDefault();
-    const trimmed = value.trim();
-    onSearch(trimmed);
-    if (!trimmed) {
-      setOpen(false);
-    }
-  }
-
   function handleClose() {
-    setValue('');
-    onSearch('');
+    setValue(initialValue);
     setOpen(false);
   }
 
-  return (
-    <div className="relative flex items-center justify-end">
-      {/* Botón lupa - se desvanece cuando se abre */}
-      <button
-        type="button"
-        onClick={() => setOpen(true)}
-        className={`flex h-9 w-9 items-center justify-center rounded-full border border-border bg-card shadow-card transition-all duration-300 hover:bg-accentSoft ${
-          open ? 'pointer-events-none absolute opacity-0' : 'relative opacity-100'
-        }`}
-        aria-label="Buscar productos"
-      >
-        <Search className="h-4 w-4 text-stone-600" />
-      </button>
+  function handleClear() {
+    setValue('');
+    if (initialValue) onSearch('');
+    inputRef.current?.focus();
+  }
 
-      {/* Formulario de búsqueda - se expande desde la derecha */}
-      <form
-        ref={formRef}
-        onSubmit={handleSubmit}
-        className={`flex items-center gap-2 transition-all duration-300 ease-out ${
-          open
-            ? 'w-full opacity-100'
-            : 'pointer-events-none absolute w-0 opacity-0'
-        }`}
-      >
-        <div className="relative flex-1 overflow-hidden">
-          <input
-            ref={inputRef}
-            type="text"
-            value={value}
-            onChange={(e) => setValue(e.target.value)}
-            placeholder="Buscar productos..."
-            className="w-full rounded-full border border-border bg-card px-4 py-2 pr-9 text-sm shadow-card outline-none focus:border-accent"
-          />
-          <button
-            type="button"
-            onClick={handleClose}
-            className="absolute right-2 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600"
-            aria-label="Cerrar búsqueda"
-          >
-            <X className="h-4 w-4" />
-          </button>
-        </div>
-        <button
-          type="submit"
-          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-border bg-card shadow-card transition-colors hover:bg-accentSoft"
-          aria-label="Buscar"
-        >
-          <Search className="h-4 w-4 text-stone-600" />
-        </button>
-      </form>
+  return (
+    <div className="relative shrink-0">
+      <button type="button" onClick={() => { setOpen(true); requestAnimationFrame(() => inputRef.current?.focus()); }} aria-label="Buscar productos" aria-expanded={open} className="relative flex h-11 w-11 items-center justify-center rounded-lg border border-border bg-white hover:border-foreground">
+        <Search className="h-5 w-5" aria-hidden="true" />
+        {initialValue ? <span className="absolute right-1 top-1 h-1.5 w-1.5 rounded-full bg-accent" aria-hidden="true" /> : null}
+      </button>
+      {open ? (
+        <form role="search" onSubmit={(event) => { event.preventDefault(); onSearch(value.trim()); }} onKeyDown={(event) => { if (event.key === 'Escape') handleClose(); }} className="absolute right-0 top-full z-20 mt-2 flex w-[min(85vw,420px)] items-center gap-1 rounded-lg border border-border bg-white p-1 shadow-lg">
+          <label htmlFor="catalog-search" className="sr-only">Nombre del producto</label>
+          <input ref={inputRef} id="catalog-search" type="text" value={value} onChange={(event) => setValue(event.target.value)} placeholder="Buscar por nombre" className="min-w-0 flex-1 bg-transparent px-3 py-2 text-sm outline-none" />
+          {value ? <button type="button" onClick={handleClear} aria-label="Borrar búsqueda" title="Borrar búsqueda" className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md hover:bg-background"><Eraser className="h-4 w-4" aria-hidden="true" /></button> : null}
+          <button type="submit" aria-label="Buscar" className="flex h-10 w-10 items-center justify-center rounded-md bg-foreground text-white"><Search className="h-4 w-4" /></button>
+          <button type="button" onClick={handleClose} aria-label="Cerrar búsqueda" className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md hover:bg-background"><X className="h-4 w-4" /></button>
+        </form>
+      ) : null}
     </div>
   );
 }

@@ -11,11 +11,11 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="es">
-      <body className="h-screen">
-        <Suspense fallback={<div className="h-[69px] border-b border-border bg-background" />}>
+      <body className="flex h-dvh flex-col">
+        <Suspense fallback={<div className="h-[73px] border-b border-border bg-white" />}>
           <Header />
         </Suspense>
-        <main className="mx-auto flex h-[calc(100vh-69px)] max-w-md flex-col overflow-y-auto px-4 pt-5">
+        <main className="mx-auto flex min-h-0 w-full max-w-7xl flex-1 flex-col overflow-y-auto px-4 pb-8 pt-6 sm:px-8 lg:pt-8">
           {children}
         </main>
       </body>

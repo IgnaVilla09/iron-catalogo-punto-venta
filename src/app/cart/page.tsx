@@ -15,12 +15,12 @@ export async function generateMetadata({
 
 export default function CartPage() {
   return (
-    <section className="space-y-4">
-      <div>
-        <p className="text-xs uppercase tracking-[0.3em] text-stone-500">Resumen</p>
-        <h1 className="text-2xl font-bold">Tu carrito</h1>
+    <section className="space-y-6">
+      <div className="border-b border-border pb-5">
+        <p className="section-label">Tu selección</p>
+        <h1 className="mt-2 text-5xl font-bold sm:text-6xl">Tu carrito</h1>
       </div>
-      <Suspense fallback={<div className="rounded-[2rem] border border-border bg-card p-4 shadow-card">Cargando carrito...</div>}>
+      <Suspense fallback={<div className="border border-border bg-card p-4">Cargando carrito...</div>}>
         <CartClient />
       </Suspense>
     </section>

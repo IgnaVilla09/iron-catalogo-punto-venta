@@ -1,4 +1,4 @@
-import { ApiResponse, CatalogOrder, CatalogProduct, PaginationMeta } from '@/lib/types';
+import { ApiResponse, CatalogListProduct, CatalogOrder, CatalogProduct, PaginationMeta } from '@/lib/types';
 
 export const PRODUCTS_PAGE_SIZE = 20;
 
@@ -37,7 +37,7 @@ export async function getProducts(pointOfSaleId: string) {
 }
 
 export async function getProductsPage(pointOfSaleId: string, page = 1, limit = PRODUCTS_PAGE_SIZE, search?: string): Promise<{
-  products: CatalogProduct[];
+  products: CatalogListProduct[];
   meta: PaginationMeta;
 }> {
   const params = new URLSearchParams({
@@ -55,7 +55,7 @@ export async function getProductsPage(pointOfSaleId: string, page = 1, limit = P
   );
 
   return {
-    products: payload.data,
+    products: payload.data.map(({ id, name, imageUrl, price, category }) => ({ id, name, imageUrl, price, category })),
     meta: payload.meta ?? {
       page,
       limit,

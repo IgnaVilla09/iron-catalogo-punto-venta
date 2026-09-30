@@ -31,6 +31,9 @@ export interface CatalogProduct {
   variants: CatalogVariant[];
 }
 
+// The listing only renders these fields; variants are fetched on the detail page.
+export type CatalogListProduct = Pick<CatalogProduct, 'id' | 'name' | 'imageUrl' | 'price' | 'category'>;
+
 export interface CatalogOrderItem {
   id: string;
   productId: string;

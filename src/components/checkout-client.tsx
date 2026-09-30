@@ -2,16 +2,22 @@
 
 import { FormEvent, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import Link from 'next/link';
+import { Copy } from 'lucide-react';
+import { Toaster, toast } from 'sonner';
 import { createOrder } from '@/lib/api';
-import { formatPrice, getCartTotal } from '@/lib/utils';
+import { buildPosPath, formatPrice, getCartTotal } from '@/lib/utils';
 import { useCartStore } from '@/stores/cart-store';
+import { useHydrated } from '@/stores/use-hydrated';
 
 export function CheckoutClient() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const pos = searchParams.get('pos');
+  const search = searchParams.get('search');
   const items = useCartStore((state) => state.items);
   const clear = useCartStore((state) => state.clear);
+  const hydrated = useHydrated();
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -47,7 +53,7 @@ export function CheckoutClient() {
       });
 
       clear();
-      router.push(`/confirmation/${order.id}?pos=${encodeURIComponent(pos)}`);
+      router.push(buildPosPath(`/confirmation/${order.id}`, pos, search));
     } catch (submitError) {
       setError(submitError instanceof Error ? submitError.message : 'No se pudo generar el pedido');
     } finally {
@@ -55,52 +61,52 @@ export function CheckoutClient() {
     }
   }
 
+  if (!hydrated) {
+    return <div className="border border-border bg-white p-6 text-sm text-muted">Cargando compra...</div>;
+  }
+
   if (items.length === 0) {
-    return <p className="rounded-[2rem] border border-border bg-card p-6 shadow-card">Agrega productos antes de finalizar la compra.</p>;
+    return <div className="border border-border bg-white p-8"><p className="text-sm text-muted">Agregá productos antes de finalizar la compra.</p><Link href={buildPosPath('/', pos, search)} className="button-accent mt-5">Ver productos</Link></div>;
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="rounded-[2rem] border border-border bg-card p-4 shadow-card">
-        <div className="mb-4 flex items-center justify-between">
-          <div>
-            <p className="font-semibold">Metodo de pago</p>
-            <p className="text-sm text-stone-600">Mercado Pago/Transferencia</p>
+    <>
+      <Toaster position="bottom-center" richColors closeButton />
+      <form onSubmit={handleSubmit} className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_350px]">
+      <div className="space-y-6">
+        <div className="border border-border bg-white p-5 sm:p-7">
+          <h2 className="text-3xl font-bold">Tus datos</h2>
+          <p className="mt-2 text-sm text-muted">Los usaremos para identificar tu pedido.</p>
+          <div className="mt-6 grid gap-4 sm:grid-cols-2">
+            <label className="space-y-2 text-sm font-bold">Nombre<input required name="firstName" autoComplete="given-name" className="field" /></label>
+            <label className="space-y-2 text-sm font-bold">Apellido<input required name="lastName" autoComplete="family-name" className="field" /></label>
+            <label className="space-y-2 text-sm font-bold sm:col-span-2">Teléfono<input required name="phone" type="tel" autoComplete="tel" className="field" /></label>
+            <label className="space-y-2 text-sm font-bold sm:col-span-2">Notas <span className="font-normal text-muted">(opcional)</span><textarea name="notes" rows={3} className="field resize-y" placeholder="Algo que debamos saber sobre tu pedido" /></label>
           </div>
-          <p className="font-bold text-accent">{formatPrice(getCartTotal(items))}</p>
         </div>
 
-        <div className="grid gap-3">
-          <input required name="firstName" placeholder="Nombre" className="rounded-2xl border border-border px-4 py-3" />
-          <input required name="lastName" placeholder="Apellido" className="rounded-2xl border border-border px-4 py-3" />
-          <input required name="phone" placeholder="Telefono" className="rounded-2xl border border-border px-4 py-3" />
-          <textarea name="notes" placeholder="Notas (opcional)" rows={4} className="rounded-2xl border border-border px-4 py-3" />
-        </div>
-      </div>
-
-      <div className="rounded-[2rem] border border-emerald-300 bg-emerald-600 p-4 text-white shadow-card">
-        <p className="text-sm font-semibold uppercase tracking-[0.2em] text-emerald-100">Datos de transferencia</p>
-        <div className="mt-3 space-y-2 text-sm">
-          <p>
-            <span className="font-semibold text-emerald-100">Alias:</span>{' '}
-            <span className="font-bold">iront.cf</span>
-          </p>
-          <p>
-            <span className="font-semibold text-emerald-100">Titular:</span>{' '}
-            <span className="font-medium">Augusto Lucas Villafañe Palma</span>
-          </p>
-          <p>
-            <span className="font-semibold text-emerald-100">Cuenta:</span>{' '}
-            <span className="font-medium">Mercado Pago</span>
-          </p>
+        <div className="border border-border bg-white p-5 sm:p-7">
+          <h2 className="text-3xl font-bold">Transferencia</h2>
+          <p className="mt-2 text-sm text-muted">Pagá por Mercado Pago y enviá el comprobante por WhatsApp después de confirmar el pedido.</p>
+          <dl className="mt-5 divide-y divide-border border-y border-border text-sm">
+            <div className="flex items-center justify-between gap-2 py-3"><dt className="text-muted">Alias</dt><dd className="flex items-center gap-2 font-extrabold">iront.cf<button type="button" onClick={async () => { try { await navigator.clipboard.writeText('iront.cf'); toast.success('Alias copiado'); } catch { toast.error('No se pudo copiar el alias'); } }} aria-label="Copiar alias iront.cf" className="flex h-10 w-10 items-center justify-center rounded-lg border border-border hover:bg-background"><Copy className="h-4 w-4" /></button></dd></div>
+            <div className="flex justify-between gap-3 py-3"><dt className="shrink-0 text-muted">Titular</dt><dd className="text-right font-bold">Augusto Lucas Villafañe Palma</dd></div>
+            <div className="flex justify-between gap-3 py-3"><dt className="text-muted">Cuenta</dt><dd className="font-bold">Mercado Pago</dd></div>
+          </dl>
         </div>
       </div>
 
-      {error ? <p className="rounded-2xl bg-red-50 px-4 py-3 text-sm text-red-700">{error}</p> : null}
-
-      <button disabled={loading} className="w-full rounded-2xl bg-accent px-4 py-3 font-semibold text-white disabled:opacity-70">
-        {loading ? 'Generando pedido...' : 'Confirmar pedido'}
-      </button>
-    </form>
+      <aside className="border border-border bg-white p-5 lg:sticky lg:top-4">
+        <h2 className="text-3xl font-bold">Tu pedido</h2>
+        <div className="mt-5 space-y-3 border-y border-border py-5 text-sm">
+          {items.map((item) => <div key={item.variantId} className="flex justify-between gap-4"><span className="text-muted">{item.quantity} × {item.productName} · {item.sizeLabel}</span><span className="shrink-0 font-bold">{formatPrice(item.price * item.quantity)}</span></div>)}
+        </div>
+        <div className="mt-5 flex items-center justify-between text-lg font-extrabold"><span>Total</span><span>{formatPrice(getCartTotal(items))}</span></div>
+        {error ? <p role="alert" className="mt-5 border-l-4 border-red-600 bg-red-50 px-4 py-3 text-sm text-red-800">{error}</p> : null}
+        <button type="submit" disabled={loading} className="button-accent mt-6 w-full">{loading ? 'Generando pedido...' : 'Confirmar pedido'}</button>
+        <p className="mt-4 text-xs leading-5 text-muted">Al confirmar, guardaremos tu pedido. Después podrás enviar el comprobante por WhatsApp.</p>
+      </aside>
+      </form>
+    </>
   );
 }

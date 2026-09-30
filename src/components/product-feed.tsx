@@ -2,20 +2,34 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { getProductsPage, PRODUCTS_PAGE_SIZE } from '@/lib/api';
-import { CatalogProduct, PaginationMeta } from '@/lib/types';
+import { CatalogListProduct, PaginationMeta } from '@/lib/types';
 import { ArrowUp } from 'lucide-react';
 import { ProductCard } from '@/components/product-card';
 
 const REFRESH_INTERVAL_MS = 10000;
 
-function mergeProducts(current: CatalogProduct[], incoming: CatalogProduct[]) {
+function mergeProducts(current: CatalogListProduct[], incoming: CatalogListProduct[]) {
   const seen = new Set(current.map((product) => product.id));
   return [...current, ...incoming.filter((product) => !seen.has(product.id))];
 }
 
-function mergeLatestProducts(current: CatalogProduct[], latest: CatalogProduct[]) {
+function sameProduct(current: CatalogListProduct, latest: CatalogListProduct) {
+  return current.name === latest.name && current.imageUrl === latest.imageUrl &&
+    current.price === latest.price && current.category?.id === latest.category?.id &&
+    current.category?.name === latest.category?.name && current.category?.label === latest.category?.label;
+}
+
+function mergeLatestProducts(current: CatalogListProduct[], latest: CatalogListProduct[]) {
+  const currentById = new Map(current.map((product) => [product.id, product]));
   const latestIds = new Set(latest.map((product) => product.id));
-  return [...latest, ...current.filter((product) => !latestIds.has(product.id))];
+  const merged = [
+    ...latest.map((product) => {
+      const previous = currentById.get(product.id);
+      return previous && sameProduct(previous, product) ? previous : product;
+    }),
+    ...current.filter((product) => !latestIds.has(product.id)),
+  ];
+  return merged.length === current.length && merged.every((product, index) => product === current[index]) ? current : merged;
 }
 
 export function ProductFeed({
@@ -24,7 +38,7 @@ export function ProductFeed({
   pos,
   search,
 }: {
-  initialProducts: CatalogProduct[];
+  initialProducts: CatalogListProduct[];
   initialMeta: PaginationMeta;
   pos: string;
   search?: string;
@@ -79,7 +93,7 @@ export function ProductFeed({
   }, []);
 
   function scrollToTop() {
-    scrollContainerRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
+    scrollContainerRef.current?.scrollTo({ top: 0, behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' });
   }
 
   async function refreshLatestProducts(showError = false) {
@@ -93,11 +107,9 @@ export function ProductFeed({
     try {
       const latest = await getProductsPage(posRef.current, 1, PRODUCTS_PAGE_SIZE, searchRef.current);
       setProducts((current) => mergeLatestProducts(current, latest.products));
-      setMeta((current) => ({
-        ...current,
-        total: latest.meta.total,
-        totalPages: latest.meta.totalPages,
-      }));
+      setMeta((current) => current.total === latest.meta.total && current.totalPages === latest.meta.totalPages
+        ? current
+        : { ...current, total: latest.meta.total, totalPages: latest.meta.totalPages });
     } catch (loadError) {
       if (showError) {
         setError(loadError instanceof Error ? loadError.message : 'No se pudieron buscar productos nuevos');
@@ -163,7 +175,7 @@ export function ProductFeed({
     }
 
     const intervalId = window.setInterval(() => {
-      void refreshLatestProducts();
+      if (document.visibilityState === 'visible') void refreshLatestProducts();
     }, REFRESH_INTERVAL_MS);
 
     return () => window.clearInterval(intervalId);
@@ -214,14 +226,14 @@ export function ProductFeed({
   }, [hasMore, pos, search]);
 
   return (
-    <div ref={scrollContainerRef} className="relative flex-1 overflow-y-auto pb-5">
-      <div className="grid grid-cols-2 gap-3">
-        {products.map((product) => (
-          <ProductCard key={product.id} product={product} pos={pos} />
+    <div ref={scrollContainerRef} className="relative min-h-0 flex-1 overflow-y-auto pb-5 pt-5">
+      <div className="grid grid-cols-2 gap-3 sm:gap-5 md:grid-cols-3 lg:grid-cols-4">
+        {products.map((product, index) => (
+          <ProductCard key={product.id} product={product} pos={pos} search={search} priority={index < 2} />
         ))}
       </div>
 
-      <div className="mt-4 rounded-[2rem] border border-border bg-card px-4 py-3 text-center text-sm text-stone-600 shadow-card">
+      <div className="mt-6 border-t border-border px-4 py-4 text-center text-sm text-muted" aria-live="polite">
         {loading
           ? 'Cargando mas productos...'
           : hasMore
@@ -237,20 +249,20 @@ export function ProductFeed({
               void refreshLatestProducts(true);
             }}
             disabled={refreshing || loading}
-            className="w-full rounded-2xl border border-border bg-card px-4 py-3 text-sm font-semibold text-stone-700 shadow-card disabled:opacity-70"
+            className="button-outline mx-auto flex w-full max-w-xs"
           >
             {refreshing ? 'Buscando productos nuevos...' : 'Buscar productos nuevos'}
           </button>
         ) : null}
 
         {!hasMore && isEndVisible && !refreshing ? (
-          <p className="text-center text-xs text-stone-500">
+          <p className="text-center text-xs text-muted">
             Buscando productos nuevos automaticamente cada 10 segundos.
           </p>
         ) : null}
       </div>
 
-      {error ? <p className="mt-4 rounded-2xl bg-red-50 px-4 py-3 text-sm text-red-700">{error}</p> : null}
+      {error ? <p role="alert" className="mt-4 border-l-4 border-red-600 bg-red-50 px-4 py-3 text-sm text-red-800">{error}</p> : null}
 
       {hasMore ? <div ref={sentinelRef} className="h-1" aria-hidden="true" /> : null}
 
@@ -258,7 +270,7 @@ export function ProductFeed({
         <button
           type="button"
           onClick={scrollToTop}
-          className="fixed bottom-6 right-6 z-30 flex items-center gap-2 rounded-full border border-border bg-card px-4 py-3 text-sm font-semibold shadow-card transition-colors hover:bg-accentSoft"
+          className="fixed bottom-6 right-6 z-30 flex items-center gap-2 rounded-lg border border-border bg-white px-4 py-3 text-sm font-bold shadow-lg transition-colors hover:bg-accentSoft"
         >
           <ArrowUp className="h-4 w-4" />
           Inicio

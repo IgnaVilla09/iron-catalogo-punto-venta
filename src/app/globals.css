@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800&family=Manrope:wght@400;500;600;700;800&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -13,9 +15,14 @@
 
   body {
     margin: 0;
-    background: #f5f1eb;
-    color: #1f1720;
-    font-family: Arial, Helvetica, sans-serif;
+    background: #f2f4f3;
+    color: #202329;
+    font-family: 'Manrope', Arial, sans-serif;
+  }
+
+  h1, h2, h3 {
+    font-family: 'Barlow Condensed', 'Arial Narrow', Arial, sans-serif;
+    line-height: 1;
   }
 
   a {
@@ -28,5 +35,45 @@
   textarea,
   select {
     font: inherit;
+  }
+
+  :focus-visible {
+    outline: 2px solid #007b90;
+    outline-offset: 3px;
+  }
+
+  ::selection {
+    background: #b7eff4;
+    color: #202329;
+  }
+}
+
+@layer components {
+  .button-primary {
+    @apply inline-flex min-h-12 items-center justify-center gap-2 rounded-lg bg-foreground px-5 py-3 text-sm font-extrabold text-white transition-colors hover:bg-[#353b42] disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
+  .button-accent {
+    @apply inline-flex min-h-12 items-center justify-center gap-2 rounded-lg bg-accent px-5 py-3 text-sm font-extrabold text-foreground transition-colors hover:bg-[#73dce8] disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
+  .button-outline {
+    @apply inline-flex min-h-12 items-center justify-center gap-2 rounded-lg border border-border bg-white px-5 py-3 text-sm font-bold text-foreground transition-colors hover:border-foreground disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
+  .field {
+    @apply min-h-12 w-full rounded-lg border border-border bg-white px-4 py-3 text-sm text-foreground placeholder:text-muted focus:border-foreground focus:outline-none;
+  }
+
+  .section-label {
+    @apply text-sm font-bold text-muted;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
   }
 }

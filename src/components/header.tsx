@@ -1,59 +1,35 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { ShoppingBag } from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
 import { useCartStore } from '@/stores/cart-store';
+import { useHydrated } from '@/stores/use-hydrated';
 import { buildPosPath } from '@/lib/utils';
 
 export function Header() {
   const searchParams = useSearchParams();
   const pos = searchParams.get('pos');
   const search = searchParams.get('search');
-  const items = useCartStore((state) => state.items);
-  const lastAddedAt = useCartStore((state) => state.lastAddedAt);
-  const count = items.reduce((sum, item) => sum + item.quantity, 0);
-  const [showAddedNotice, setShowAddedNotice] = useState(false);
-
-  useEffect(() => {
-    if (!lastAddedAt) {
-      return;
-    }
-
-    setShowAddedNotice(true);
-    const timeoutId = window.setTimeout(() => setShowAddedNotice(false), 1800);
-
-    return () => window.clearTimeout(timeoutId);
-  }, [lastAddedAt]);
+  const count = useCartStore((state) => state.items.reduce((sum, item) => sum + item.quantity, 0));
+  const hydrated = useHydrated();
+  const visibleCount = hydrated ? count : 0;
 
   return (
-    <header className="sticky top-0 z-10 border-b border-border bg-background/95 backdrop-blur">
-      <div className="mx-auto flex max-w-md items-center justify-between gap-3 px-4 py-3">
-        <div className="w-10" />
-        <Link href={buildPosPath('/', pos, search)} className="flex justify-center">
-          <Image src="/logo.png" alt="Iron Catalog" width={120} height={44} priority className="h-11 w-auto" />
+    <header className="relative z-10 shrink-0 border-b border-border bg-white">
+      <div className="mx-auto flex h-[73px] w-full max-w-7xl items-center justify-between gap-4 px-4 sm:px-8">
+        <Link href={buildPosPath('/', pos, search)} aria-label="Iron Threads, ir al catálogo" className="inline-flex items-center">
+          <Image src="/logo.png" alt="Iron Threads" width={177} height={40} priority className="h-auto w-[145px] sm:w-[177px]" />
         </Link>
-        <div className="relative flex flex-col items-end">
-          <Link href={buildPosPath('/cart', pos, search)} className="relative flex h-10 w-10 items-center justify-center rounded-full border border-border bg-card shadow-card">
-            <svg viewBox="0 0 24 24" aria-hidden="true" className="h-[18px] w-[18px] fill-none stroke-current stroke-2">
-              <circle cx="9" cy="20" r="1" />
-              <circle cx="18" cy="20" r="1" />
-              <path d="M3 4h2l2.4 10.2a1 1 0 0 0 1 .8H18a1 1 0 0 0 1-.8L21 7H7" />
-            </svg>
-            {count > 0 ? (
-              <span className="absolute -right-1 -top-1 flex min-h-5 min-w-5 items-center justify-center rounded-full bg-accent px-1 text-xs font-bold text-white">
-                {count}
-              </span>
+        <div className="flex items-center gap-5">
+          <span className="hidden text-sm font-bold text-muted sm:block">Indumentaria para moverte</span>
+          <Link href={buildPosPath('/cart', pos, search)} aria-label={`Ver carrito, ${visibleCount} productos`} className="relative flex h-11 w-11 items-center justify-center rounded-lg border border-border transition-colors hover:border-foreground">
+            <ShoppingBag className="h-5 w-5" aria-hidden="true" />
+            {visibleCount > 0 ? (
+              <span className="absolute -right-2 -top-2 flex min-h-5 min-w-5 items-center justify-center rounded-full bg-accent px-1 text-[11px] font-extrabold text-foreground">{visibleCount}</span>
             ) : null}
           </Link>
-          <div
-            className={showAddedNotice
-              ? 'pointer-events-none absolute top-12 rounded-full bg-accent px-3 py-1.5 text-xs font-semibold text-white opacity-100 shadow-card transition-all duration-300'
-              : 'pointer-events-none absolute top-10 rounded-full bg-accent px-3 py-1.5 text-xs font-semibold text-white opacity-0 shadow-card transition-all duration-300'}
-          >
-            Producto agregado!
-          </div>
         </div>
       </div>
     </header>

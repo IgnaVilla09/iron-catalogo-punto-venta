@@ -26,17 +26,17 @@ export default async function ProductPage({
   const [{ id }, { pos, search }] = await Promise.all([params, searchParams]);
 
   if (!pos) {
-    return <p>Falta `pos` para cargar el producto.</p>;
+    return <p>Falta el punto de venta para cargar el producto.</p>;
   }
 
   const product = await getProduct(id, pos);
 
   return (
-    <section className="space-y-4">
-      <Link href={buildPosPath('/', pos, search)} className="text-sm font-semibold text-stone-500">
-        Volver al catalogo
+    <section className="space-y-5">
+      <Link href={buildPosPath('/', pos, search)} className="inline-flex py-1 text-sm font-bold text-muted hover:text-foreground">
+        ← Volver al catálogo
       </Link>
-      <Suspense fallback={<div className="rounded-[2rem] border border-border bg-card p-4 shadow-card">Cargando producto...</div>}>
+      <Suspense fallback={<div className="border border-border bg-card p-4">Cargando producto...</div>}>
         <ProductDetail product={product} />
       </Suspense>
     </section>
