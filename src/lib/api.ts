@@ -33,7 +33,10 @@ async function request<T>(path: string, init?: RequestInit): Promise<ApiResponse
 
 export async function getProducts(pointOfSaleId: string) {
   const payload = await request<CatalogProduct[]>(`/api/v1/catalog/public/products?pointOfSaleId=${encodeURIComponent(pointOfSaleId)}`);
-  return payload.data;
+  return payload.data.map((product) => ({
+    ...product,
+    isOnSale: product.isOnSale ?? false,
+  }));
 }
 
 export async function getProductsPage(pointOfSaleId: string, page = 1, limit = PRODUCTS_PAGE_SIZE, search?: string): Promise<{
@@ -55,7 +58,14 @@ export async function getProductsPage(pointOfSaleId: string, page = 1, limit = P
   );
 
   return {
-    products: payload.data.map(({ id, name, imageUrl, price, category }) => ({ id, name, imageUrl, price, category })),
+    products: payload.data.map((product) => ({
+      id: product.id,
+      name: product.name,
+      imageUrl: product.imageUrl,
+      price: product.price,
+      category: product.category,
+      isOnSale: product.isOnSale ?? false,
+    })),
     meta: payload.meta ?? {
       page,
       limit,
@@ -75,12 +85,21 @@ export async function getOrder(id: string) {
   return payload.data;
 }
 
+export async function validateDiscountCode(couponCode: string, subtotal: number) {
+  const payload = await request<{ code: string; discountAmount: number }>('/api/v1/catalog/public/discount-codes/validate', {
+    method: 'POST',
+    body: JSON.stringify({ couponCode, subtotal }),
+  });
+  return payload.data;
+}
+
 export async function createOrder(input: {
   pointOfSaleId: string;
   customerFirstName: string;
   customerLastName: string;
   customerPhone: string;
   notes?: string;
+  couponCode?: string;
   items: Array<{
     productId: string;
     variantId: string;

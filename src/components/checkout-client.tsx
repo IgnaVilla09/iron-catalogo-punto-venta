@@ -3,9 +3,9 @@
 import { FormEvent, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { Copy } from 'lucide-react';
+import { Copy, Tag } from 'lucide-react';
 import { Toaster, toast } from 'sonner';
-import { createOrder } from '@/lib/api';
+import { createOrder, validateDiscountCode } from '@/lib/api';
 import { buildPosPath, formatPrice, getCartTotal } from '@/lib/utils';
 import { useCartStore } from '@/stores/cart-store';
 import { useHydrated } from '@/stores/use-hydrated';
@@ -20,6 +20,29 @@ export function CheckoutClient() {
   const hydrated = useHydrated();
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [couponCode, setCouponCode] = useState('');
+  const [appliedCoupon, setAppliedCoupon] = useState<{ code: string; discountAmount: number } | null>(null);
+  const [validatingCoupon, setValidatingCoupon] = useState(false);
+  const subtotal = getCartTotal(items);
+  const total = Math.max(0, subtotal - (appliedCoupon?.discountAmount ?? 0));
+
+  async function applyCoupon() {
+    const code = couponCode;
+    if (!code) return;
+    setValidatingCoupon(true);
+    try {
+      const coupon = await validateDiscountCode(code, subtotal);
+      setAppliedCoupon(coupon);
+      setCouponCode(coupon.code);
+      setError(null);
+      toast.success('Código de descuento aplicado');
+    } catch (couponError) {
+      setAppliedCoupon(null);
+      setError(couponError instanceof Error ? couponError.message : 'No se pudo aplicar el código');
+    } finally {
+      setValidatingCoupon(false);
+    }
+  }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -45,6 +68,7 @@ export function CheckoutClient() {
         customerLastName: String(formData.get('lastName') || ''),
         customerPhone: String(formData.get('phone') || ''),
         notes: String(formData.get('notes') || ''),
+        couponCode: appliedCoupon?.code,
         items: items.map((item) => ({
           productId: item.productId,
           variantId: item.variantId,
@@ -101,7 +125,16 @@ export function CheckoutClient() {
         <div className="mt-5 space-y-3 border-y border-border py-5 text-sm">
           {items.map((item) => <div key={item.variantId} className="flex justify-between gap-4"><span className="text-muted">{item.quantity} × {item.productName} · {item.sizeLabel}</span><span className="shrink-0 font-bold">{formatPrice(item.price * item.quantity)}</span></div>)}
         </div>
-        <div className="mt-5 flex items-center justify-between text-lg font-extrabold"><span>Total</span><span>{formatPrice(getCartTotal(items))}</span></div>
+        <div className="mt-5 border-y border-border py-5">
+          <label htmlFor="coupon-code" className="text-sm font-bold">¿Tenés un código de descuento?</label>
+          <div className="mt-2 flex gap-2">
+            <input id="coupon-code" value={couponCode} onChange={(event) => { setCouponCode(event.target.value); setAppliedCoupon(null); }} placeholder="Ej: IRON10" className="field min-w-0 flex-1 font-mono" />
+            <button type="button" onClick={() => void applyCoupon()} disabled={!couponCode || validatingCoupon} className="button-outline shrink-0 px-3">{validatingCoupon ? '...' : 'Aplicar'}</button>
+          </div>
+          {appliedCoupon ? <div className="mt-3 flex items-center justify-between rounded-lg bg-accentSoft px-3 py-2 text-sm"><span className="flex items-center gap-2 font-bold"><Tag className="h-4 w-4" />{appliedCoupon.code}</span><button type="button" onClick={() => { setAppliedCoupon(null); setCouponCode(''); }} className="font-bold underline">Quitar</button></div> : null}
+        </div>
+        <div className="mt-5 space-y-3 text-sm"><div className="flex justify-between"><span className="text-muted">Subtotal</span><span>{formatPrice(subtotal)}</span></div>{appliedCoupon ? <div className="flex justify-between text-[#007b90]"><span>Descuento</span><span>-{formatPrice(appliedCoupon.discountAmount)}</span></div> : null}</div>
+        <div className="mt-5 flex items-center justify-between border-t border-border pt-5 text-lg font-extrabold"><span>Total</span><span>{formatPrice(total)}</span></div>
         {error ? <p role="alert" className="mt-5 border-l-4 border-red-600 bg-red-50 px-4 py-3 text-sm text-red-800">{error}</p> : null}
         <button type="submit" disabled={loading} className="button-accent mt-6 w-full">{loading ? 'Generando pedido...' : 'Confirmar pedido'}</button>
         <p className="mt-4 text-xs leading-5 text-muted">Al confirmar, guardaremos tu pedido. Después podrás enviar el comprobante por WhatsApp.</p>

@@ -29,10 +29,11 @@ export interface CatalogProduct {
     label: string;
   } | null;
   variants: CatalogVariant[];
+  isOnSale?: boolean;
 }
 
 // The listing only renders these fields; variants are fetched on the detail page.
-export type CatalogListProduct = Pick<CatalogProduct, 'id' | 'name' | 'imageUrl' | 'price' | 'category'>;
+export type CatalogListProduct = Pick<CatalogProduct, 'id' | 'name' | 'imageUrl' | 'price' | 'category' | 'isOnSale'>;
 
 export interface CatalogOrderItem {
   id: string;

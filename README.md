@@ -36,7 +36,7 @@ npm run dev
 Abrir, por ejemplo:
 
 ```text
-http://localhost:3000?pos=gym
+http://localhost:3002?pos=gym
 ```
 
 `pos` puede ser el UUID, el `name` o el `label` del punto de venta.
@@ -46,6 +46,15 @@ http://localhost:3000?pos=gym
 ```bash
 npm run typecheck
 ```
+
+## Versionado obligatorio
+
+Todo cambio que altere funcionalidades, API, comportamiento visual o configuración debe quedar versionado antes de integrarse.
+
+1. Actualizar `package.json` y `package-lock.json` siguiendo Versionado Semántico.
+2. Registrar el cambio en `CHANGELOG.md` con versión, fecha y resumen.
+3. Ejecutar `npm run typecheck`.
+4. Crear un commit descriptivo y una etiqueta Git `vX.Y.Z` al publicar la versión.
 
 ## Funcionalidades
 
@@ -80,7 +89,7 @@ npm run typecheck
 1. **Home** (`/?pos=...`): listado paginado de productos con precio y stock del punto de venta
 2. **Producto** (`/product/[id]?pos=...`): seleccion de color/talle, stock disponible, consulta por otros talles via WhatsApp
 3. **Carrito** (`/cart?pos=...`): cantidades editables, total, continuar compra
-4. **Checkout** (`/checkout?pos=...`): formulario de datos + datos de transferencia Mercado Pago
+4. **Checkout** (`/checkout?pos=...`): formulario de datos, código de descuento y datos de transferencia Mercado Pago
 5. **Confirmacion** (`/confirmation/[id]?pos=...`): modal final con total, link directo a WhatsApp para enviar comprobante
 
 ## Estructura del proyecto
