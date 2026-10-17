@@ -20,11 +20,11 @@ Frontend publico mobile-first para el catalogo de productos de `Iron Threads`. P
 Crear `iron-catalog/.env.local` con:
 
 ```env
-NEXT_PUBLIC_API_URL=http://localhost:4000
+API_URL=http://localhost:4000
 NEXT_PUBLIC_CATALOG_WHATSAPP=2622221483
 ```
 
-`NEXT_PUBLIC_API_URL` debe apuntar a la base del backend. El frontend ya agrega `/api/v1/...` en el codigo.
+`API_URL` debe apuntar a la base del backend. Es una variable privada: el navegador nunca recibe su valor; las llamadas desde componentes cliente pasan por `/api/catalog` dentro de Next.js.
 
 ## Desarrollo
 

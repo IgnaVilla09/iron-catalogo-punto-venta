@@ -1,5 +1,10 @@
 # Historial de versiones — Iron Catálogo
 
+## 1.1.1 — 2026-10-17 — API privada
+
+- Reemplazo de `NEXT_PUBLIC_API_URL` por `API_URL`, disponible únicamente en el servidor.
+- Las interacciones del catálogo desde el navegador pasan por el proxy interno `/api/catalog`, sin exponer la URL del backend.
+
 ## 1.1.0 — 2026-10-12 — Ofertas y descuentos
 
 - Pegatina visual de oferta mediante `ofertasvg.svg` para productos marcados como `isOnSale` en Iron Stock.

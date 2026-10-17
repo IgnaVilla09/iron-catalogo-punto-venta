@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { getProductsPage, PRODUCTS_PAGE_SIZE } from '@/lib/api';
+import { getProductsPage, PRODUCTS_PAGE_SIZE } from '@/lib/catalog-api-client';
 import { CatalogListProduct, PaginationMeta } from '@/lib/types';
 import { ArrowUp } from 'lucide-react';
 import { ProductCard } from '@/components/product-card';

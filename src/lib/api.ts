@@ -1,12 +1,13 @@
 import { ApiResponse, CatalogListProduct, CatalogOrder, CatalogProduct, PaginationMeta } from '@/lib/types';
+import 'server-only';
 
 export const PRODUCTS_PAGE_SIZE = 20;
 
-const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+const apiUrl = process.env.API_URL;
 
 function getApiUrl() {
   if (!apiUrl) {
-    throw new Error('Missing NEXT_PUBLIC_API_URL');
+    throw new Error('Missing API_URL');
   }
 
   return apiUrl;

@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Copy, Tag } from 'lucide-react';
 import { Toaster, toast } from 'sonner';
-import { createOrder, validateDiscountCode } from '@/lib/api';
+import { createOrder, validateDiscountCode } from '@/lib/catalog-api-client';
 import { buildPosPath, formatPrice, getCartTotal } from '@/lib/utils';
 import { useCartStore } from '@/stores/cart-store';
 import { useHydrated } from '@/stores/use-hydrated';
